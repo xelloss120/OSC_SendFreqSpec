@@ -1,0 +1,2 @@
+# VCI_OSC_SendFreqSpec
+VCIにOSCで周波数スペクトルを送るやつ
