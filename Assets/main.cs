@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
@@ -8,16 +9,17 @@ public class main : MonoBehaviour
     [SerializeField] TMP_Dropdown Device;
     [SerializeField] TMP_InputField LengthSec;
     [SerializeField] TMP_InputField Frequency;
+    [SerializeField] TMP_InputField Samples;
     [SerializeField] TMP_InputField Section;
+
     [SerializeField] AudioSource AudioSource;
     [SerializeField] LineRenderer LineRenderer;
     [SerializeField] uOscClient OscClient;
 
-    const int LEN = 4096;
-    float[] Spectrum = new float[LEN];
+    int Length;
+    float[] Spectrum;
 
-    //List<float> Values = new List<float>();
-    public List<float> Values = new List<float>();
+    List<float> Values = new List<float>();
 
     void Start()
     {
@@ -28,12 +30,6 @@ public class main : MonoBehaviour
             Device.options.Add(option);
         }
 
-        for (int i = 0; i < LEN; i++)
-        {
-            var vec3 = new Vector3(Mathf.Log(i + 1), 0, 0);
-            LineRenderer.SetPosition(i, vec3);
-        }
-
         Apply();
     }
 
@@ -42,15 +38,14 @@ public class main : MonoBehaviour
         AudioSource.GetSpectrumData(Spectrum, 0, FFTWindow.Rectangular);
 
         var p = 1;
-        var f = Mathf.Pow(LEN, 1.0f / Values.Count);
+        var f = Mathf.Pow(Length, 1.0f / Values.Count);
 
         Values[0] = 0;
 
-        var log = "";
-        for (int i = 0; i < LEN; i++)
+        for (int i = 0; i < Length; i++)
         {
             var vec3 = LineRenderer.GetPosition(i);
-            vec3.y = Spectrum[i] == 0 ? 0 : Mathf.Log(Spectrum[i], 10000);
+            vec3.y = Spectrum[i] == 0 ? 0 : Mathf.Log(Spectrum[i], Mathf.Pow(10, 30));
             LineRenderer.SetPosition(i, vec3);
 
             Values[p - 1] += Spectrum[i];
@@ -69,21 +64,34 @@ public class main : MonoBehaviour
         string device;
         int lengthSec;
         int frequency;
+        int samples;
         int section;
 
         device = Device.options[Device.value].text;
         int.TryParse(LengthSec.text, out lengthSec);
         int.TryParse(Frequency.text, out frequency);
+        int.TryParse(Samples.text, out samples);
         int.TryParse(Section.text, out section);
 
         AudioSource.clip = Microphone.Start(device, true, lengthSec, frequency);
         while (Microphone.GetPosition(null) <= 0) { }
         AudioSource.Play();
 
+        Length = samples;
+        Array.Resize(ref Spectrum, samples);
+
         Values.Clear();
         for (int i = 0; i < section; i++)
         {
             Values.Add(0);
+        }
+
+        var max = Mathf.Log(Length);
+        LineRenderer.positionCount = Length;
+        for (int i = 0; i < Length; i++)
+        {
+            var vec3 = new Vector3(Mathf.Log(i + 1) / max, 0, 0);
+            LineRenderer.SetPosition(i, vec3);
         }
     }
 
