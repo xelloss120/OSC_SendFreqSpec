@@ -8,7 +8,7 @@ public class main : MonoBehaviour
     [SerializeField] AudioSource AudioSource;
     [SerializeField] LineRenderer LineRenderer;
     
-    const int LEN = 64;
+    const int LEN = 4096;
     float[] Spectrum = new float[LEN];
 
     void Start()
@@ -25,7 +25,7 @@ public class main : MonoBehaviour
 
         for (int i = 0; i < LEN; i++)
         {
-            var vec3 = new Vector3(-0.5f + (1.0f / LEN * i), 0, 0);
+            var vec3 = new Vector3(Mathf.Log(i + 1), 0, 0);
             LineRenderer.SetPosition(i, vec3);
         }
     }
@@ -36,7 +36,7 @@ public class main : MonoBehaviour
         for (int i = 0; i < LEN; i++)
         {
             var vec3 = LineRenderer.GetPosition(i);
-            vec3.y = Spectrum[i] * 3;
+            vec3.y = Spectrum[i] == 0 ? 0 : Mathf.Log(Spectrum[i], 10000);
             LineRenderer.SetPosition(i, vec3);
         }
     }
