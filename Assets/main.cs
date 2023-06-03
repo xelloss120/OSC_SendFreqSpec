@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using uOSC;
 
 public class main : MonoBehaviour
 {
@@ -8,6 +9,7 @@ public class main : MonoBehaviour
     [SerializeField] TMP_InputField Frequency;
     [SerializeField] AudioSource AudioSource;
     [SerializeField] LineRenderer LineRenderer;
+    [SerializeField] uOscClient OscClient;
 
     const int LEN = 4096;
     float[] Spectrum = new float[LEN];
@@ -39,6 +41,8 @@ public class main : MonoBehaviour
             vec3.y = Spectrum[i] == 0 ? 0 : Mathf.Log(Spectrum[i], 10000);
             LineRenderer.SetPosition(i, vec3);
         }
+
+        OscClient.Send("/uOSC/test");
     }
 
     void Apply()
