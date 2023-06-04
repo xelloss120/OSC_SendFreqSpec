@@ -9,8 +9,13 @@ public class main : MonoBehaviour
     [SerializeField] TMP_Dropdown Device;
     [SerializeField] TMP_InputField LengthSec;
     [SerializeField] TMP_InputField Frequency;
+
     [SerializeField] TMP_InputField Samples;
     [SerializeField] TMP_InputField Section;
+
+    [SerializeField] TMP_InputField Host;
+    [SerializeField] TMP_InputField Port;
+    [SerializeField] TMP_InputField Address;
 
     [SerializeField] AudioSource AudioSource;
     [SerializeField] LineRenderer LineRenderer;
@@ -20,6 +25,8 @@ public class main : MonoBehaviour
     float[] Spectrum;
 
     List<float> Values = new List<float>();
+
+    string OSC_Address;
 
     void Start()
     {
@@ -61,7 +68,7 @@ public class main : MonoBehaviour
         {
             osc += Values[i].ToString() + ",";
         }
-        OscClient.Send(osc);
+        OscClient.Send(OSC_Address, osc);
     }
 
     void Apply()
@@ -69,14 +76,24 @@ public class main : MonoBehaviour
         string device;
         int lengthSec;
         int frequency;
+
         int samples;
         int section;
+
+        string host;
+        int port;
+        string address;
 
         device = Device.options[Device.value].text;
         int.TryParse(LengthSec.text, out lengthSec);
         int.TryParse(Frequency.text, out frequency);
+
         int.TryParse(Samples.text, out samples);
         int.TryParse(Section.text, out section);
+
+        host = Host.text;
+        int.TryParse(Port.text, out port);
+        address = Address.text;
 
         AudioSource.clip = Microphone.Start(device, true, lengthSec, frequency);
         while (Microphone.GetPosition(null) <= 0) { }
@@ -98,6 +115,10 @@ public class main : MonoBehaviour
             var vec3 = new Vector3(Mathf.Log(i + 1) / max, 0, 0);
             LineRenderer.SetPosition(i, vec3);
         }
+
+        OscClient.address = host;
+        OscClient.port = port;
+        OSC_Address = address;
     }
 
     public void OnClick()
