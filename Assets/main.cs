@@ -56,7 +56,12 @@ public class main : MonoBehaviour
             }
         }
 
-        //OscClient.Send("/uOSC/test");
+        var osc = "";
+        for (int i = 0; i < Values.Count; i++)
+        {
+            osc += Values[i].ToString() + ",";
+        }
+        OscClient.Send(osc);
     }
 
     void Apply()
